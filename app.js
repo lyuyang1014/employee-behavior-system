@@ -67,8 +67,14 @@ class BehaviorApp {
         const category = behaviorData[categoryKey];
         if (!category) return;
 
-        // 更新标题
-        document.getElementById('categoryTitle').textContent = category.title;
+        // 更新标题和描述
+        document.getElementById('categoryTitle').innerHTML = `
+            ${category.title}
+            <div class="category-description">
+                <span class="description-text">${category.description}</span>
+                <span class="stat-badge">共 ${category.totalCount} 项异常行为</span>
+            </div>
+        `;
         
         // 更新面包屑
         this.updateBreadcrumb(['首页', category.title]);
@@ -83,17 +89,6 @@ class BehaviorApp {
         const container = document.getElementById('categoryContent');
         
         let html = `
-            <div class="category-overview">
-                <p>${category.description}</p>
-                <div class="category-stats">
-                    <span class="stat-badge">共 ${category.totalCount} 项异常行为</span>
-                    <span class="risk-badge ${category.riskLevel}">
-                        ${category.riskLevel === 'high' ? '高风险' : 
-                          category.riskLevel === 'medium' ? '中风险' : 
-                          category.riskLevel === 'mixed' ? '混合风险' : '低风险'}
-                    </span>
-                </div>
-            </div>
             <div class="subcategory-grid">
         `;
 
@@ -239,6 +234,9 @@ class BehaviorApp {
                         <div class="case-source">
                             <i class="fas fa-external-link-alt"></i>
                             来源：${behavior.realCase.source}
+                            ${behavior.realCase.url ? `<br><a href="${behavior.realCase.url}" target="_blank" rel="noopener noreferrer" class="news-link">
+                                <i class="fas fa-link"></i> 查看原始新闻报道
+                            </a>` : ''}
                         </div>
                     </div>
                 </div>
@@ -406,27 +404,88 @@ class BehaviorApp {
 
     // 按风险等级筛选
     filterByRisk(riskLevel) {
-        if (this.currentView !== 'main') return;
+        if (riskLevel === 'all') {
+            this.showMainView();
+            return;
+        }
         
-        const cards = document.querySelectorAll('.category-card');
+        // 收集所有指定风险等级的行为
+        const results = [];
         
-        cards.forEach(card => {
-            if (riskLevel === 'all') {
-                card.style.display = 'block';
-            } else {
-                const cardRisk = this.getCategoryRisk(card);
-                card.style.display = cardRisk === riskLevel ? 'block' : 'none';
-            }
+        Object.keys(behaviorData).forEach(categoryKey => {
+            const category = behaviorData[categoryKey];
+            
+            Object.keys(category.subcategories).forEach(subKey => {
+                const subcategory = category.subcategories[subKey];
+                
+                subcategory.behaviors.forEach((behavior, index) => {
+                    if (behavior.riskLevel === riskLevel) {
+                        results.push({
+                            behavior,
+                            categoryKey,
+                            subcategoryKey: subKey,
+                            behaviorIndex: index,
+                            categoryTitle: category.title,
+                            subcategoryTitle: subcategory.title
+                        });
+                    }
+                });
+            });
         });
+
+        this.renderFilterResults(results, riskLevel);
     }
 
-    // 获取分类风险等级
-    getCategoryRisk(cardElement) {
-        const className = cardElement.className;
-        if (className.includes('violations')) return 'high';
-        if (className.includes('economic')) return 'medium';
-        if (className.includes('business')) return 'mixed';
-        return 'low';
+    // 渲染筛选结果
+    renderFilterResults(results, riskLevel) {
+        this.hideAllViews();
+        document.getElementById('searchView').style.display = 'block';
+        this.currentView = 'search';
+
+        const riskText = riskLevel === 'high' ? '高风险' : 
+                        riskLevel === 'medium' ? '中风险' : '低风险';
+        
+        // 更新面包屑
+        this.updateBreadcrumb(['首页', `${riskText}行为筛选`]);
+
+        const container = document.getElementById('searchContent');
+        
+        if (results.length === 0) {
+            container.innerHTML = `
+                <div class="no-results">
+                    <i class="fas fa-filter"></i>
+                    <p>没有找到${riskText}的异常行为</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="search-summary">
+                <p>找到 <strong>${results.length}</strong> 个${riskText}异常行为</p>
+            </div>
+            <div class="search-results">
+        `;
+
+        results.forEach(result => {
+            html += `
+                <div class="search-result-item" 
+                     onclick="app.showBehaviorDetail('${result.categoryKey}', '${result.subcategoryKey}', ${result.behaviorIndex})">
+                    <div class="search-result-title">${result.behavior.title}</div>
+                    <div class="search-result-category">
+                        ${result.categoryTitle} > ${result.subcategoryTitle}
+                    </div>
+                    <div class="search-result-description">${result.behavior.description}</div>
+                    <div class="search-result-meta">
+                        <span class="risk-badge ${result.behavior.riskLevel}">${riskText}</span>
+                        <span class="behavior-id">${result.behavior.id}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     // 返回上级分类
