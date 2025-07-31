@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工异常行为排查系统</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 页头 -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-shield-alt"></i> 员工异常行为排查系统</h1>
+                <p class="subtitle">基于北京银行员工异常行为清单 - 完整173项异常行为数据库</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number">173</span>
+                    <span class="stat-label">异常行为</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">主要分类</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">20+</span>
+                    <span class="stat-label">真实案例</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 搜索栏 -->
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="搜索异常行为关键词..." onkeyup="app.search()">
+                <button id="clearSearch" onclick="app.clearSearch()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="search-filters">
+                <button class="filter-btn active" data-filter="all">全部</button>
+                <button class="filter-btn" data-filter="high">高风险</button>
+                <button class="filter-btn" data-filter="medium">中风险</button>
+                <button class="filter-btn" data-filter="low">低风险</button>
+            </div>
+        </div>
+
+        <!-- 面包屑导航 -->
+        <nav class="breadcrumb" id="breadcrumb">
+            <span class="breadcrumb-item active">首页</span>
+        </nav>
+
+        <!-- 主视图 -->
+        <main id="mainView" class="main-view">
+            <div class="category-grid">
+                <div class="category-card violations" onclick="app.showCategory('violations')">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>违法犯罪类</h3>
+                        <p>48项严重异常行为</p>
+                        <div class="card-stats">
+                            <span class="behavior-count">48项</span>
+                            <span class="risk-badge high">高风险</span>
+                        </div>
+                        <div class="card-description">
+                            涉及黄赌毒、经济犯罪、数据泄露、洗钱等违法活动，需要重点监控
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="category-card economic" onclick="app.showCategory('economic')">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>经济行为类</h3>
+                        <p>30项经济异常</p>
+                        <div class="card-stats">
+                            <span class="behavior-count">30项</span>
+                            <span class="risk-badge medium">中风险</span>
+                        </div>
+                        <div class="card-description">
+                            个人交易异常、信贷风险、账户问题等经济行为异常
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="category-card business" onclick="app.showCategory('business')">
+                    <div class="card-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>业务操作类</h3>
+                        <p>83项操作违规</p>
+                        <div class="card-stats">
+                            <span class="behavior-count">83项</span>
+                            <span class="risk-badge mixed">混合风险</span>
+                        </div>
+                        <div class="card-description">
+                            违规销售、违规管理、违规代理等失范行为
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="category-card family" onclick="app.showCategory('family')">
+                    <div class="card-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>家庭情况类</h3>
+                        <p>5项家庭影响因素</p>
+                        <div class="card-stats">
+                            <span class="behavior-count">5项</span>
+                            <span class="risk-badge low">低风险</span>
+                        </div>
+                        <div class="card-description">
+                            家庭矛盾、家庭变故、亲友风险等情况
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="category-card social" onclick="app.showCategory('social')">
+                    <div class="card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>社会交往类</h3>
+                        <p>7项社会交往问题</p>
+                        <div class="card-stats">
+                            <span class="behavior-count">7项</span>
+                            <span class="risk-badge low">低风险</span>
+                        </div>
+                        <div class="card-description">
+                            不当交往、作风问题、个人品行等
+                        </div>
+                    </div>
+                    <div class="card-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 分类视图 -->
+        <div id="categoryView" class="content-view" style="display: none;">
+            <div class="view-header">
+                <button class="back-btn" onclick="app.showMainView()">
+                    <i class="fas fa-arrow-left"></i> 返回首页
+                </button>
+                <h2 id="categoryTitle"></h2>
+            </div>
+            <div id="categoryContent" class="subcategory-grid"></div>
+        </div>
+
+        <!-- 子分类视图 -->
+        <div id="subcategoryView" class="content-view" style="display: none;">
+            <div class="view-header">
+                <button class="back-btn" onclick="app.goBackToCategory()">
+                    <i class="fas fa-arrow-left"></i> 返回分类
+                </button>
+                <h2 id="subcategoryTitle"></h2>
+            </div>
+            <div id="subcategoryContent" class="behavior-list"></div>
+        </div>
+
+        <!-- 行为详情视图 -->
+        <div id="behaviorView" class="content-view" style="display: none;">
+            <div class="view-header">
+                <button class="back-btn" onclick="app.goBackToSubcategory()">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </button>
+            </div>
+            <div id="behaviorContent" class="behavior-detail"></div>
+        </div>
+
+        <!-- 搜索结果视图 -->
+        <div id="searchView" class="content-view" style="display: none;">
+            <div class="view-header">
+                <button class="back-btn" onclick="app.showMainView()">
+                    <i class="fas fa-arrow-left"></i> 返回首页
+                </button>
+                <h2>搜索结果</h2>
+            </div>
+            <div id="searchContent" class="search-results"></div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>系统信息</h4>
+                <p>员工异常行为排查系统</p>
+                <p>版本：v1.0</p>
+                <p>数据来源：北京银行员工异常行为清单</p>
+            </div>
+            <div class="footer-section">
+                <h4>使用说明</h4>
+                <p>• 点击分类卡片浏览异常行为</p>
+                <p>• 使用搜索功能快速定位</p>
+                <p>• 查看真实案例和排查方法</p>
+            </div>
+            <div class="footer-section">
+                <h4>风险等级</h4>
+                <p><span class="risk-badge high">高风险</span> 严重违法行为</p>
+                <p><span class="risk-badge medium">中风险</span> 需要关注</p>
+                <p><span class="risk-badge low">低风险</span> 预防监控</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 员工异常行为排查系统. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 加载脚本 -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            window.app = new BehaviorApp();
+            console.log('员工异常行为排查系统初始化完成');
+        });
+    </script>
+</body>
+</html>
